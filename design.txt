@@ -1,0 +1,140 @@
+= Weight Tracker Design =
+
+== Description ==
+
+GUI allowing entry of weight and other health data.
+
+Data:
+* Date of entered data.
+* Height; inches/ft or cm/m.
+* Date of birth. Year probably enough.
+** Used to determine basis for good BMI, etc.
+* Body fat percentage.
+* Water percentage.
+* Waist measurement.
+* Notes / comment for the entry.
+* Might allow for user-created columns, e.g., calories
+** Would allow indicating type: String, int, double.
+
+Auto-calculate:
+* BMI based on height and weight.
+
+Data Format:
+- JSON
+({
+	'person': {
+		'name': '',
+		'dob': secondsSinceEpoch,
+		'weightType': 'lbs',
+		'heightType': 'in'
+	},
+	'data': {
+		[
+		'date': secondsSinceEpoch,
+		'weight': 0.0,
+		'height': 0.0,
+		'fat': 0.0,
+		'water': 0.0,
+		'waist': 0
+		]
+	}
+})
+
+=== Visualizations ===
+
+Provide charts (JFreeChart) showing trend data.
+* Get data about general BMI based on age and such.
+
+== Classes ==
+
+=== Data Structures ===
+
+Person {
+	String name;
+	Date dob;
+	WeightType wType;
+	HeightType hType;
+	List<HealthDataPoint> data;
+}
+HealthDataPoint {
+	Date date;
+	Double weight;
+	Double fat;
+	Double water;
+	Integer waist;
+	String note;
+}
+DataTypes {
+	Enum WeightType {LBS, KG};
+	Enum HeightType {INCHES, FtInches, CM, METERS};
+}
+WeightTableModel {
+	List<DataColumn> columns;
+}
+/** Description for a table column. */
+DataColumn {
+	int column;
+	String name;
+	Class type;
+	String tooltip;
+}
+ImportDataColumn {
+	int column;
+	String name;
+}
+DataImporter {
+	static importFromCsv(File f, List<DataColumn> columns) return List<HealthDataPoint>;
+}
+DataExporter {
+	exportToCsv(File f, List<HealthDataPoint> data);
+	healthDataPointToCsv();
+	exportToJson();
+	healthDataPointToJson();
+}
+
+=== GUI ===
+
+Main {
+	JTable {
+		date - (auto-enter current date)
+		height - (remember previous data)
+		weight
+		fat%
+		water%
+		BMI - auto-calculated
+	}
+	Toolbar {
+		New entry
+		Delete entry
+		Save file
+		Open file
+		Export data
+	}
+}
+Options {
+	Name,
+	Height: inches, cm,
+	Weight: lbs, kg,
+	Columns: pick what columns to show. Some fixed,
+	Column order
+}
+DataImporter {
+	Support CSV files.
+	Show user first row of data.
+	User determines whether comma or tab delimited.
+	User selects what column represents each piece of data.
+	Parsing date string could be tricky.
+	For weight and height would need to parse off "cm" piece or allow user to indicate which it is.
+}
+psyb3rChi.swing.table.ColumnSorter {
+	Two JList.
+	Arrow buttons the user can use to modify order.
+	// constructor
+	ColumnSorter(
+		int[] defaultOrder,
+		List<String> unPicked,
+		List<String> picked,
+		int[] pickedOrder
+	);
+}
+
